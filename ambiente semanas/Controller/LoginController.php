@@ -1,12 +1,35 @@
 <?php
-    include_once '../../Model/LoginModel.php';
+    include_once $_SERVER["DOCUMENT_ROOT"] . '/Model/LoginModel.php';
+
+    if(session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
 
     if(isset($_POST["btnIniciarSesion"]))
     {
         $correo = $_POST["txtCorreo"];
         $contrasenna = $_POST["txtContrasenna"];
 
-        IniciarSesionModel($correo, $contrasenna);
+        $resultado = IniciarSesionModel($correo, $contrasenna);
+
+        if($resultado != null && $resultado -> num_rows > 0)
+        {
+            $datos = mysqli_fetch_array($resultado);
+            $_SESSION["NombreUsuario"] = $datos["Nombre"];
+
+            header('location: ../../View/home.php');
+        }
+        else
+        {
+            session_destroy();
+            $_POST["txtMensaje"] = "Su información no se ha validado correctamente";
+        }
+    }
+
+    if(isset($_POST["btnCerrarSesion"]))
+    {
+        session_destroy();
+        header('location: ../../View/home.php');
     }
 
     if(isset($_POST["btnRegistrarUsuario"]))
@@ -20,7 +43,7 @@
 
         if($resultado == true)
         {
-            header('location: ../Login/inicioSesion.php');
+            header('location: ../../View/Login/inicioSesion.php');
         }
         else
         {
